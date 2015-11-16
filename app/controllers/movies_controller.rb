@@ -21,7 +21,7 @@ class MoviesController < ApplicationController
     end
     if !params.has_key? :ratings
       if !session.has_key? :ratings
-        session[:ratings] = ''
+        session[:ratings] = Movie.uniq.pluck(:rating)
       end
       need_redir = true
     else
