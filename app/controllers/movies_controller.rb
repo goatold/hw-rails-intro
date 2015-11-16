@@ -11,22 +11,43 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
-    @all_ratings = Movie.uniq.pluck(:rating)
-    if !(params[:order_by].blank?)
+    if !params.has_key? :order_by
+      if !session.has_key? :order_by
+        session[:order_by] = ''
+      end
+      need_redir = true
+    else
       session[:order_by] = params[:order_by]
     end
+    if !params.has_key? :ratings
+      if !session.has_key? :ratings
+        session[:ratings] = ''
+      end
+      need_redir = true
+    else
+      if params[:ratings].class == Array
+        session[:ratings] = params[:ratings]
+      else
+        session[:ratings] = params[:ratings].keys
+      end
+    end
+    if need_redir
+      flash.keep
+      redirect_to movies_path(ratings: session[:ratings],
+                              order_by: session[:order_by])
+      return
+    end
+    @movies = Movie.all
+    @all_ratings = Movie.uniq.pluck(:rating)
     if !(session[:order_by].blank?)
       @_order_movies_by = session[:order_by]
       @movies = @movies.order(@_order_movies_by)
     end
-    if params.has_key?(:ratings) and !(params[:ratings].empty?)
-      session[:ratings] = params[:ratings].keys
+    if session[:ratings].empty?
+      session[:ratings] = @all_ratings
     end
-    if session.has_key?(:ratings) and !(session[:ratings].empty?)
-      @checked_ratings = session[:ratings]
-      @movies = @movies.where(:rating => @checked_ratings)
-    end
+    @checked_ratings = session[:ratings]
+    @movies = @movies.where(:rating => @checked_ratings)
   end
 
   def new
