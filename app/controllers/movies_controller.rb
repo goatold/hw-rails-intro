@@ -27,7 +27,7 @@ class MoviesController < ApplicationController
     else
       if params[:ratings].class == Array
         session[:ratings] = params[:ratings]
-      elsif params[:ratings].class == Hash
+      elsif !params[:ratings].empty?
         session[:ratings] = params[:ratings].keys
       else
         session[:ratings] = ''
