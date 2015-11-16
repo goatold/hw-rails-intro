@@ -21,14 +21,16 @@ class MoviesController < ApplicationController
     end
     if !params.has_key? :ratings
       if !session.has_key? :ratings
-        session[:ratings] = Movie.uniq.pluck(:rating)
+        session[:ratings] = ''
       end
       need_redir = true
     else
       if params[:ratings].class == Array
         session[:ratings] = params[:ratings]
-      else
+      elsif params[:ratings].class == Hash
         session[:ratings] = params[:ratings].keys
+      else
+        session[:ratings] = ''
       end
     end
     if need_redir
