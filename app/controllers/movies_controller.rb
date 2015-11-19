@@ -47,9 +47,10 @@ class MoviesController < ApplicationController
     end
     if session[:ratings].empty?
       session[:ratings] = @all_ratings
+    else
+        @movies = @movies.where(:rating => session[:ratings])
     end
     @checked_ratings = session[:ratings]
-    @movies = @movies.where(:rating => @checked_ratings)
   end
 
   def new
