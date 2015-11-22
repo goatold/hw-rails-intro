@@ -61,6 +61,15 @@ Then /I should (not )?see movies of ratings:(.*)$/ do |neg, rating_list|
 end
 
 Then /I should see all the movies/ do
-  # Make sure that all the movies in the app are visible in the table
-  fail "Unimplemented"
+  page.should have_xpath('//table/tbody/tr', count: 10)
+end
+
+When(/^I follow "(.*?)"$/) do |link|
+  click_link(link)
+end
+
+Then /I should see movies ordered by "(.*)"/ do |order_by|
+  ml = page.all(:xpath, "//table/tbody/tr/td[count(//table/thead/tr/th/a[.=\"#{order_by}\"]/../preceding-sibling::th)+1]").map {|x| x.text}
+  ml.each_cons(2).all?{|i,j| i <= j} or \
+  raise "Movies NOT ordered by #{order_by}:\n #{ml}"
 end
