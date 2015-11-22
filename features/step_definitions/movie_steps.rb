@@ -39,13 +39,17 @@ When /^(?:|I )press '([^"]*)'$/ do |button|
   click_button(button)
 end
 
-When /^(?:|I )(un)?check the following ratings: (.*)/ do |uncheck, rating_list|
-  # HINT: use String#split to split up the rating_list, then
-  #   iterate over the ratings and reuse the "When I check..." or
-  #   "When I uncheck..." steps in lines 89-95 of web_steps.rb
+When /^(?:|I )check the following ratings: (.*)/ do |rating_list|
   rating_list.split(',').each do |rating|
     rating = rating.strip
-    send("#{uncheck}check".to_sym, "ratings_#{rating}")
+    check("ratings_#{rating}")
+  end
+end
+
+When /^(?:|I )uncheck the following ratings: (.*)/ do |rating_list|
+  rating_list.split(',').each do |rating|
+    rating = rating.strip
+    uncheck("ratings_#{rating}")
   end
 end
 
@@ -61,7 +65,7 @@ Then /I should (not )?see movies of ratings:(.*)$/ do |neg, rating_list|
 end
 
 Then /I should see all the movies/ do
-  page.should have_xpath('//table/tbody/tr', count: 10)
+  page.should have_xpath('//table/tbody/tr', count: Movie.count)
 end
 
 When(/^I follow "(.*?)"$/) do |link|
