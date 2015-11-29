@@ -1,7 +1,7 @@
 class MoviesController < ApplicationController
 
   def movie_params
-    params.require(:movie).permit(:title, :rating, :description, :release_date)
+    params.require(:movie).permit(:title, :rating, :description, :release_date, :director)
   end
 
   def show
@@ -11,46 +11,21 @@ class MoviesController < ApplicationController
   end
 
   def index
-    if !params.has_key? :order_by
-      if !session.has_key? :order_by
-        session[:order_by] = ''
-      end
-      need_redir = true
-    else
-      session[:order_by] = params[:order_by]
-    end
-    if !params.has_key? :ratings
-      if !session.has_key? :ratings
-        session[:ratings] = ''
-      end
-      need_redir = true
-    else
-      if params[:ratings].class == Array
-        session[:ratings] = params[:ratings]
-      elsif !params[:ratings].empty?
-        session[:ratings] = params[:ratings].keys
-      else
-        session[:ratings] = ''
-      end
-    end
-    if need_redir
-      flash.keep
-      redirect_to movies_path(ratings: session[:ratings],
-                              order_by: session[:order_by])
-      return
-    end
-    @movies = Movie.all
+    @order_by = params[:order_by] || session[:order_by]
+    @selected_ratings = params[:ratings] || session[:ratings] || {}
     @all_ratings = Movie.uniq.pluck(:rating)
-    if !(session[:order_by].blank?)
-      @_order_movies_by = session[:order_by]
-      @movies = @movies.order(@_order_movies_by)
+    if @selected_ratings == {}
+      @selected_ratings = Hash[@all_ratings.map {|rating| [rating, rating]}]
     end
-    if session[:ratings].empty?
-      session[:ratings] = @all_ratings
-    else
-        @movies = @movies.where(:rating => session[:ratings])
+    if params[:order_by] != session[:order_by] or params[:ratings] != session[:ratings]
+      session[:order_by] = @order_by
+      session[:ratings] = @selected_ratings
+      flash.keep
+      redirect_to movies_path(ratings: @selected_ratings,
+                              order_by: @order_by) and return
     end
-    @checked_ratings = session[:ratings]
+    ordering = {@order_by => :asc} if @order_by and !@order_by.blank?
+    @movies = Movie.where(rating: @selected_ratings.keys).order(ordering)
   end
 
   def new
