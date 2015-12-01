@@ -14,6 +14,9 @@ module NavigationHelpers
     case page_name
     when /^the (RottenPotatoes )?home\s?page$/ 
       '/movies'
+    when /^the details page for "([^\"]+)"$/ 
+      mid = Movie.where({title:$1})[0].id
+      "/movies/#{mid}"
     when /^the home\s?page$/
       '/'
 
