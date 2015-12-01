@@ -17,6 +17,7 @@
         = link_to 'Movie Title',
           movies_path(order_by: :title),
           id:'title_header'
+      %th Director
       %th Rating
       %th{:class => (@order_by == 'release_date') && 'hilite'}
         = link_to 'Release Date',
@@ -27,6 +28,7 @@
     - @movies.each do |movie|
       %tr
         %td= movie.title 
+        %td= movie.director
         %td= movie.rating
         %td= movie.release_date
         %td= link_to "More about #{movie.title}", movie_path(movie)
