@@ -13,7 +13,7 @@ class MoviesController < ApplicationController
   def index
     @order_by = params[:order_by] || session[:order_by]
     @selected_ratings = params[:ratings] || session[:ratings] || {}
-    @all_ratings = Movie.uniq.pluck(:rating)
+    @all_ratings = Movie.uniq.pluck(:rating).select {|r| !(r.nil? or r.blank?)}
     if @selected_ratings == {}
       @selected_ratings = Hash[@all_ratings.map {|rating| [rating, rating]}]
     end
@@ -26,6 +26,15 @@ class MoviesController < ApplicationController
     end
     ordering = {@order_by => :asc} if @order_by and !@order_by.blank?
     @movies = Movie.where(rating: @selected_ratings.keys).order(ordering)
+  end
+
+  def similar
+    @movie = Movie.find(params[:id])
+    @movies = @movie.similar
+    if @movies.nil?
+      flash[:warning] = "'#{@movie.title}' has no director info"
+      redirect_to movies_path and return
+    end
   end
 
   def new
