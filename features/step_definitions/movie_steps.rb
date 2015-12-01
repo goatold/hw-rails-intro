@@ -1,13 +1,6 @@
 require 'uri'
 require 'cgi'
 
-def path_to(page_name)
-    case page_name
-    when /^the (RottenPotatoes )?home\s?page$/ then '/movies'
-    end
-end
-  
-
 # Add a declarative step here for populating the DB with movies.
 Given /the following movies exist/ do |movies_table|
   movies_table.hashes.each do |movie|
@@ -29,6 +22,44 @@ Then /I should see "(.*)" before "(.*)"/ do |e1, e2|
   #  ensure that that e1 occurs before e2.
   #  page.body is the entire content of the page as a string.
   fail "Unimplemented"
+end
+
+Then /^I should be on the home page$/ do
+  expect(current_path).to eq("/movies")
+end
+
+Then /^I should be on the Similar Movies page for "(.*?)"$/ do |title|
+  mid = Movie.where({title: title})[0].id
+  expect(current_path).to eq("/movies/#{mid}/similar")
+end
+
+Then /^Movie "([^\"]+)" should has no director info$/ do |title|
+  expect(page).to have_xpath("//table/tbody/tr/td[contains(.,'#{title}')]/following-sibling::td[not(node())]")
+end
+
+Then /^(?:|I )should see "([^\"]+)"$/ do |text|
+  expect(page).to have_content(text)
+end
+
+Then /^(?:|I )should not see "([^\"]+)"$/ do |text|
+  expect(page).to have_no_content(text)
+end
+
+When(/^I go to the edit page for "(.*?)"$/) do |m|
+  mid = Movie.where({title: m})[0].id
+  visit "/movies/#{mid}/edit"
+end
+
+When(/^I fill in "(.*?)" with "(.*?)"$/) do |field, value|
+  fill_in(field, :with => value)
+end
+
+When /^(?:|I )press "([^\"]+)"$/ do |button|
+  click_button(button)
+end
+
+Then(/^the director of "(.*?)" should be "(.*?)"$/) do |title, director|
+  expect(page).to (have_content(title) and have_xpath("//ul/li[contains(.,'#{director}')]"))
 end
 
 # Make it easier to express checking or unchecking several boxes at once
