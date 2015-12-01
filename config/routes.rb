@@ -14,7 +14,9 @@ root 'movies#index'
 
   # Example resource route (maps HTTP verbs to controller actions automatically):
   #   resources :products
-resources :movies
+resources :movies do
+  get 'similar', :on => :member
+end
 
   # Example resource route with options:
   #   resources :products do
